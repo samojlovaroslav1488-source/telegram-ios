@@ -18,7 +18,7 @@ jobs:
 
       - name: Patch Xcode version requirement
         run: |
-          find build-system -type f -exec sed -i '' 's/26\.2/16.0/g' {} +
+          find build-system -type f \( -name "*.py" -o -name "*.json" \) -exec sed -i '' 's/26\.2/16.0/g' {} +
 
       - name: Generate project
         run: |
