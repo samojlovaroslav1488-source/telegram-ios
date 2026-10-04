@@ -24,21 +24,19 @@ jobs:
 
       - name: Build app
         run: |
+          mkdir -p build/artifacts
           python3 build-system/Make/Make.py \
             --cacheDir="$HOME/telegram-bazel-cache" \
             build \
             --configurationPath=build-system/appstore-configuration.json \
             --codesigningInformationPath=build-system/fake-codesigning \
             --configuration=release_arm64 \
+            --outputBuildArtifactsPath=build/artifacts \
             --buildNumber=100001
 
-      - name: Collect IPA
+      - name: List artifacts
         run: |
-          mkdir -p build/artifacts
-          for f in bazel-out/applebin_ios-ios_arm*-opt-ST-*/bin/Telegram/*.ipa; do
-            cp "$f" build/artifacts/
-          done
-          ls -la build/artifacts
+          ls -la build/artifacts || true
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
