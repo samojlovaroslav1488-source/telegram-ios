@@ -18,24 +18,27 @@ jobs:
         with:
           xcode-version: '26.2'
 
-      - name: Generate project
+      - name: Import certificates
         run: |
-          python3 build-system/Make/Make.py \
-            --cacheDir="$HOME/telegram-bazel-cache" \
-            generateProject \
-            --configurationPath=build-system/template_minimal_development_configuration.json \
-            --disableProvisioningProfiles \
-            --xcodeManagedCodesigning
+          python3 build-system/Make/ImportCertificates.py --path build-system/fake-codesigning/certs
 
       - name: Build app
         run: |
           python3 build-system/Make/Make.py \
             --cacheDir="$HOME/telegram-bazel-cache" \
             build \
-            --configurationPath=build-system/template_minimal_development_configuration.json \
+            --configurationPath=build-system/appstore-configuration.json \
             --codesigningInformationPath=build-system/fake-codesigning \
             --configuration=release_arm64 \
             --buildNumber=100001
+
+      - name: Collect IPA
+        run: |
+          mkdir -p build/artifacts
+          for f in bazel-out/applebin_ios-ios_arm*-opt-ST-*/bin/Telegram/*.ipa; do
+            cp "$f" build/artifacts/
+          done
+          ls -la build/artifacts
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
