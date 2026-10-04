@@ -16,6 +16,10 @@ jobs:
       - name: Select Xcode version
         run: sudo xcode-select -s /Applications/Xcode_16.app
 
+      - name: Patch Xcode version requirement
+        run: |
+          find build-system -type f -exec sed -i '' 's/26\.2/16.0/g' {} +
+
       - name: Generate project
         run: |
           python3 build-system/Make/Make.py \
