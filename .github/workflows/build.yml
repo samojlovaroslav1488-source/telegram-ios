@@ -33,6 +33,8 @@ jobs:
             --cacheDir="$HOME/telegram-bazel-cache" \
             build \
             --configurationPath=build-system/template_minimal_development_configuration.json \
+            --xcodeManagedCodesigning \
+            --configuration=release_arm64 \
             --buildNumber=100001
 
       - name: Upload IPA
@@ -40,4 +42,3 @@ jobs:
         with:
           name: PrimeGram-IPA
           path: build/artifacts/*.ipa
-
