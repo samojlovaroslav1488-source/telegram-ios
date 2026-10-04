@@ -18,7 +18,25 @@ jobs:
 
       - name: Patch Xcode version requirement
         run: |
-          find build-system -type f \( -name "*.py" -o -name "*.json" \) -exec sed -i '' 's/26\.2/16.0/g' {} +
+          python3 -c "
+          import os
+          for root, dirs, files in os.walk('.'):
+              if '.git' in root or 'bazel-' in root:
+                  continue
+              for file in files:
+                  if file.endswith(('.py', '.json', '.sh', '.bzl', '.bazel', '.txt')):
+                      path = os.path.join(root, file)
+                      try:
+                          with open(path, 'r', encoding='utf-8') as f:
+                              content = f.read()
+                          if '26.2' in content:
+                              content = content.replace('26.2', '16.0')
+                              with open(path, 'w', encoding='utf-8') as f:
+                                  f.write(content)
+                              print(f'Patched {path}')
+                      except Exception:
+                          pass
+          "
 
       - name: Generate project
         run: |
