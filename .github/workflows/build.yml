@@ -17,11 +17,12 @@ jobs:
         run: sudo xcode-select -s /Applications/Xcode_16.app
 
       - name: Generate project
-        run: |
-          python3 build-system/Make/Make.py \
-            --cacheDir="$HOME/telegram-bazel-cache" \
-            generateProject \
-            --configurationPath=build-system/template_minimal_development_configuration.json
+     run: |
+       python3 build-system/Make/Make.py \
+         --cacheDir="$HOME/telegram-bazel-cache" \
+         generateProject \
+         --configurationPath=build-system/template_minimal_development_configuration.json \
+         --disableProvisioningProfiles
 
       - name: Build app
         run: |
