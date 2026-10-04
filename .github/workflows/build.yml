@@ -22,7 +22,8 @@ jobs:
             --cacheDir="$HOME/telegram-bazel-cache" \
             generateProject \
             --configurationPath=build-system/template_minimal_development_configuration.json \
-            --disableProvisioningProfiles
+            --disableProvisioningProfiles \
+            --xcodeManagedCodesigning
 
       - name: Build app
         run: |
