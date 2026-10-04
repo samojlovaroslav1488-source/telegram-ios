@@ -33,6 +33,7 @@ jobs:
             --cacheDir="$HOME/telegram-bazel-cache" \
             build \
             --configurationPath=build-system/template_minimal_development_configuration.json \
+            --disableProvisioningProfiles \
             --xcodeManagedCodesigning \
             --configuration=release_arm64 \
             --buildNumber=100001
