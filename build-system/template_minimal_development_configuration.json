@@ -2,7 +2,7 @@
 	"bundle_id": "org.pg8k3m2x7q.Swiftgram",
 	"api_id": "{! get one at https://my.telegram.org/apps !}",
 	"api_hash": "{! get one at https://my.telegram.org/apps !}",
-	"team_id": "{! check README.md !}",
+	"team_id": "ABCDE12345",
 	"app_center_id": "0",
 	"is_internal_build": "true",
 	"is_appstore_build": "false",
