@@ -1,12 +1,9 @@
 name: Build PrimeGram IPA
-
 on:
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: macos-26
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -18,9 +15,17 @@ jobs:
         with:
           xcode-version: '26.2'
 
+      - name: Restore Bazel cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/telegram-bazel-cache
+          key: bazel-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            bazel-${{ runner.os }}-
+
       - name: Import certificates
         run: |
-          python3 build-system/Make/ImportCertificates.py --path build-system/fake-codesigning/certs
+          python3 build-system/Make/ImportCertificates.py --path build-system/fake-codesigning
 
       - name: Build app
         run: |
@@ -33,6 +38,13 @@ jobs:
             --configuration=release_arm64 \
             --outputBuildArtifactsPath=build/artifacts \
             --buildNumber=100001
+
+      - name: Save Bazel cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ~/telegram-bazel-cache
+          key: bazel-${{ runner.os }}-${{ github.run_id }}
 
       - name: List artifacts
         run: |
