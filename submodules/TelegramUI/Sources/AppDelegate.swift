@@ -659,7 +659,8 @@ private func extractAccountManagerState(records: AccountRecordsView<TelegramAcco
             isICloudEnabled: buildConfig.isICloudEnabled
         )
         
-        guard let appGroupUrl = maybeAppGroupUrl else {
+        guard let appGroupUrl = maybeAppGroupUrl ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+
             self.mainWindow?.presentNative(UIAlertController(title: nil, message: "Error 2", preferredStyle: .alert))
             return true
         }
