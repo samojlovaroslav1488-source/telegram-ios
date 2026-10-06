@@ -5,7 +5,63 @@ jobs:
   build:
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@v4
-      - name: Try import
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Select Xcode version
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26.2'
+
+      - name: Restore Bazel cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/telegram-bazel-cache
+          key: bazel-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            bazel-${{ runner.os }}-
+
+      - name: Import certificates
         run: |
           python3 build-system/Make/ImportCertificates.py --path build-system/fake-codesigning/certs
+
+      - name: Trust certificate
+        continue-on-error: true
+        run: |
+          sudo security add-trusted-cert -d -r trustRoot -p codeSign -k "$HOME/Library/Keychains/temp.keychain-db" build-system/fake-codesigning/certs/Public.cer
+
+      - name: Verify identity
+        run: |
+          security find-identity -v -p codesigning | tee /tmp/id.txt
+          grep -q '1) ' /tmp/id.txt
+
+      - name: Build app
+        run: |
+          mkdir -p build/artifacts
+          python3 build-system/Make/Make.py \
+            --cacheDir="$HOME/telegram-bazel-cache" \
+            build \
+            --configurationPath=build-system/appstore-configuration.json \
+            --codesigningInformationPath=build-system/fake-codesigning \
+            --configuration=release_arm64 \
+            --outputBuildArtifactsPath=build/artifacts \
+            --buildNumber=100001
+
+      - name: Save Bazel cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ~/telegram-bazel-cache
+          key: bazel-${{ runner.os }}-${{ github.run_id }}
+
+      - name: List artifacts
+        run: |
+          ls -la build/artifacts || true
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: PrimeGram-IPA
+          path: build/artifacts/*.ipa
