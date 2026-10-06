@@ -16,6 +16,7 @@ func _internal_applyMaxReadIndexInteractively(transaction: Transaction, stateMan
 
     let messageIds = transaction.applyInteractiveReadMaxIndex(index)
 
+
     
     if let peer = transaction.getPeer(index.id.peerId), peer.isForumOrMonoForum {
         if let combinedPeerReadState = transaction.getCombinedPeerReadState(peer.id), combinedPeerReadState.count == 0 {
