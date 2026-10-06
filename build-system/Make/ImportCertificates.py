@@ -1,8 +1,19 @@
 import os
 import sys
 import argparse
+import subprocess
 
-from BuildEnvironment import run_executable_with_output
+
+def sh(args, check=False):
+    r = subprocess.run(['security'] + args, capture_output=True, text=True)
+    out = (r.stdout + r.stderr).strip()
+    print('[security {}] exit={}'.format(args[0], r.returncode))
+    if out:
+        print(out[:1500])
+    if check and r.returncode != 0:
+        sys.exit(1)
+    return r.stdout
+
 
 def import_certificates(certificatesPath):
     if not os.path.exists(certificatesPath):
@@ -12,84 +23,39 @@ def import_certificates(certificatesPath):
     keychain_name = 'temp.keychain'
     keychain_password = 'secret'
 
-    existing_keychains = run_executable_with_output('security', arguments=['list-keychains'], check_result=True)
-    if keychain_name in existing_keychains:
-        run_executable_with_output('security', arguments=['delete-keychain'], check_result=True)
+    sh(['delete-keychain', keychain_name])
+    sh(['create-keychain', '-p', keychain_password, keychain_name], check=True)
 
-    run_executable_with_output('security', arguments=[
-        'create-keychain',
-        '-p',
-        keychain_password,
-        keychain_name
-    ], check_result=True)
+    existing = sh(['list-keychains', '-d', 'user'])
+    existing = [l.strip().strip('"') for l in existing.splitlines() if l.strip()]
+    sh(['list-keychains', '-d', 'user', '-s', keychain_name] + existing)
 
-    existing_keychains = run_executable_with_output('security', arguments=['list-keychains', '-d', 'user'])
-    existing_keychains.replace('"', '')
+    sh(['set-keychain-settings', keychain_name])
+    sh(['unlock-keychain', '-p', keychain_password, keychain_name])
 
-    run_executable_with_output('security', arguments=[
-        'list-keychains',
-        '-d',
-        'user',
-        '-s',
-        keychain_name,
-        existing_keychains
-    ], check_result=True)
-
-    run_executable_with_output('security', arguments=['set-keychain-settings', keychain_name])
-    run_executable_with_output('security', arguments=['unlock-keychain', '-p', keychain_password, keychain_name])
-
-    for file_name in os.listdir(certificatesPath):
+    print('FILES:', sorted(os.listdir(certificatesPath)))
+    for file_name in sorted(os.listdir(certificatesPath)):
         file_path = certificatesPath + '/' + file_name
         if file_path.endswith('.p12') or file_path.endswith('.cer'):
-            run_executable_with_output('security', arguments=[
-                'import',
-                file_path,
-                '-k',
-                keychain_name,
-                '-P',
-                '',
-                '-T',
-                '/usr/bin/codesign',
-                '-T',
-                '/usr/bin/security'
-            ], check_result=False)
+            print('IMPORT', file_name)
+            sh(['import', file_path, '-k', keychain_name, '-P', '',
+                '-T', '/usr/bin/codesign', '-T', '/usr/bin/security'])
 
-    run_executable_with_output('security', arguments=[
-        'import',
-        'build-system/AppleWWDRCAG3.cer',
-        '-k',
-        keychain_name,
-        '-P',
-        '',
-        '-T',
-        '/usr/bin/codesign',
-        '-T',
-        '/usr/bin/security'
-    ], check_result=False)
+    print('IMPORT WWDR')
+    sh(['import', 'build-system/AppleWWDRCAG3.cer', '-k', keychain_name,
+        '-P', '', '-T', '/usr/bin/codesign', '-T', '/usr/bin/security'])
 
-    run_executable_with_output('security', arguments=[
-        'set-key-partition-list',
-        '-S',
-        'apple-tool:,apple:',
-        '-k',
-        keychain_password,
-        keychain_name
-    ], check_result=True)
+    sh(['set-key-partition-list', '-S', 'apple-tool:,apple:',
+        '-k', keychain_password, keychain_name])
+
+    sh(['find-identity', '-p', 'codesigning', keychain_name])
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='build')
-
-    parser.add_argument(
-        '--path',
-        required=True,
-        help='Path to certificates.'
-    )
-
+    parser.add_argument('--path', required=True, help='Path to certificates.')
     if len(sys.argv) < 2:
         parser.print_help()
         sys.exit(1)
-
     args = parser.parse_args()
-
     import_certificates(args.path)
