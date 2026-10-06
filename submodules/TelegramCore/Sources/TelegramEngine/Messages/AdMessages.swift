@@ -494,6 +494,9 @@ private class AdMessagesHistoryContextImpl {
             guard let inputPeer else {
                 return .single((nil, nil, nil, []))
             }
+            if !UserDefaults.standard.bool(forKey: "pgShowAds") {
+    return .single((nil, nil, nil, []))
+}
             var flags: Int32 = 0
             if let _ = messageId {
                 flags |= (1 << 0)
