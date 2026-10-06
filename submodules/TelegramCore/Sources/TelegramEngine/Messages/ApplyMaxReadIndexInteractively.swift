@@ -3,18 +3,19 @@ import Postbox
 import TelegramApi
 import SwiftSignalKit
 
-
 func _internal_applyMaxReadIndexInteractively(postbox: Postbox, stateManager: AccountStateManager, index: MessageIndex) -> Signal<Void, NoError> {
     return postbox.transaction { transaction -> Void in
         _internal_applyMaxReadIndexInteractively(transaction: transaction, stateManager: stateManager, index: index)
     }
 }
-    
+
 func _internal_applyMaxReadIndexInteractively(transaction: Transaction, stateManager: AccountStateManager, index: MessageIndex) {
-    if !UserDefaults.standard.bool(forKey: "pgGhostReadOff") {
+    if UserDefaults.standard.bool(forKey: "pgGhostMode") {
         return
     }
+
     let messageIds = transaction.applyInteractiveReadMaxIndex(index)
+
     
     if let peer = transaction.getPeer(index.id.peerId), peer.isForumOrMonoForum {
         if let combinedPeerReadState = transaction.getCombinedPeerReadState(peer.id), combinedPeerReadState.count == 0 {
