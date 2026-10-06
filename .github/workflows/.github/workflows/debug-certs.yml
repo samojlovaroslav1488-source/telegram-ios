@@ -1,0 +1,18 @@
+name: Debug certs
+on:
+  workflow_dispatch:
+jobs:
+  debug:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show files
+        run: |
+          ls -laR build-system/fake-codesigning | head -40
+          cat build-system/Make/ImportCertificates.py
+      - name: Try import
+        continue-on-error: true
+        run: |
+          python3 build-system/Make/ImportCertificates.py --path build-system/fake-codesigning
+          security list-keychains
+          security find-identity -v
