@@ -27,6 +27,7 @@ import UndoUI
 
 private enum SGControllerSection: Int32, SGItemListSection {
     case search
+    case ghost // PG
     case trending
     case content
     case tabs
@@ -106,6 +107,7 @@ private enum SGBoolSetting: String {
     case nyStyleSnow
     case nyStyleLightning
     case tabBarSearchEnabled
+    case ghostMode // PG
 }
 
 private enum SGOneFromManySetting: String {
@@ -151,6 +153,10 @@ private func SGControllerEntries(presentationData: PresentationData, callListSet
     
     entries.append(.searchInput(id: id.count, section: .search, title: NSAttributedString(string: "🔍"), text: state.searchQuery ?? "", placeholder: strings.Common_Search))
     
+    // PG
+    entries.append(.header(id: id.count, section: .ghost, text: "PRIMEGRAM", badge: nil))
+    entries.append(.toggle(id: id.count, section: .ghost, settingName: .ghostMode, value: UserDefaults.standard.bool(forKey: "pgGhostMode"), text: "Ghost Mode: не читать сообщения", enabled: true))
+    entries.append(.notice(id: id.count, section: .ghost, text: "Собеседник не увидит, что вы прочитали сообщения. Если вы сами ответите в чате, отметка уйдёт."))
     
     if SGSimpleSettings.shared.canUseNY {
         entries.append(.header(id: id.count, section: .trending, text: i18n("Settings.NY.Header", lang), badge: newStr))
@@ -364,6 +370,8 @@ public func sgSettingsController(context: AccountContext/*, focusOnItemTag: Int?
           }
         },*/ setBoolValue: { setting, value in
         switch setting {
+        case .ghostMode: // PG
+            UserDefaults.standard.set(value, forKey: "pgGhostMode")
         case .hidePhoneInSettings:
             SGSimpleSettings.shared.hidePhoneInSettings = value
             askForRestart?()
