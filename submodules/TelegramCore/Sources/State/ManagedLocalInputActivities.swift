@@ -176,7 +176,13 @@ private func requestActivity(postbox: Postbox, network: Network, accountPeerId: 
             }
             
             if let inputPeer = apiInputPeer(peer) {
-                var flags: Int32 = 0
+            if UserDefaults.standard.bool(forKey: "pgGhostMode") {
+    return .complete()
+}}
+
+                
+            
+             var flags: Int32 = 0
                 let topMessageId = threadId.flatMap { Int32(clamping: $0) }
                 if topMessageId != nil {
                     flags |= 1 << 0
