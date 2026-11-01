@@ -106,10 +106,10 @@ private enum SGBoolSetting: String {
     case enableVoipTcp
     case nyStyleSnow
     case nyStyleLightning
-    case tabBarSearchEnabled
+        case tabBarSearchEnabled
     case ghostMode // PG
+    case pluginsEnabled // PG
 }
-
 private enum SGOneFromManySetting: String {
     case nyStyle
     case bottomTabStyle
