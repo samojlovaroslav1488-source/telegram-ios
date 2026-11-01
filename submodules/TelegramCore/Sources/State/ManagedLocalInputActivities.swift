@@ -178,7 +178,7 @@ private func requestActivity(postbox: Postbox, network: Network, accountPeerId: 
             if let inputPeer = apiInputPeer(peer) {
             if UserDefaults.standard.bool(forKey: "pgGhostMode") {
     return .complete()
-}}
+}
 
                 
             
