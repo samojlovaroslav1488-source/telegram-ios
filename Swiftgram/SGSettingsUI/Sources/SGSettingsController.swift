@@ -106,10 +106,11 @@ private enum SGBoolSetting: String {
     case enableVoipTcp
     case nyStyleSnow
     case nyStyleLightning
-        case tabBarSearchEnabled
+    case tabBarSearchEnabled
     case ghostMode // PG
     case pluginsEnabled // PG
 }
+
 private enum SGOneFromManySetting: String {
     case nyStyle
     case bottomTabStyle
@@ -157,6 +158,8 @@ private func SGControllerEntries(presentationData: PresentationData, callListSet
     entries.append(.header(id: id.count, section: .ghost, text: "PRIMEGRAM", badge: nil))
     entries.append(.toggle(id: id.count, section: .ghost, settingName: .ghostMode, value: UserDefaults.standard.bool(forKey: "pgGhostMode"), text: "Ghost Mode: не читать сообщения", enabled: true))
     entries.append(.notice(id: id.count, section: .ghost, text: "Собеседник не увидит, что вы прочитали сообщения. Если вы сами ответите в чате, отметка уйдёт."))
+    entries.append(.toggle(id: id.count, section: .ghost, settingName: .pluginsEnabled, value: UserDefaults.standard.bool(forKey: "pgPluginsEnabled"), text: "Включить плагины", enabled: true))
+    entries.append(.notice(id: id.count, section: .ghost, text: "Пока тумблер ничего не делает: скрипты плагинов ещё не подключены."))
     
     if SGSimpleSettings.shared.canUseNY {
         entries.append(.header(id: id.count, section: .trending, text: i18n("Settings.NY.Header", lang), badge: newStr))
@@ -372,6 +375,8 @@ public func sgSettingsController(context: AccountContext/*, focusOnItemTag: Int?
         switch setting {
         case .ghostMode: // PG
             UserDefaults.standard.set(value, forKey: "pgGhostMode")
+        case .pluginsEnabled: // PG
+            UserDefaults.standard.set(value, forKey: "pgPluginsEnabled")
         case .hidePhoneInSettings:
             SGSimpleSettings.shared.hidePhoneInSettings = value
             askForRestart?()
@@ -728,7 +733,7 @@ public func sgSettingsController(context: AccountContext/*, focusOnItemTag: Int?
         
         let entries = SGControllerEntries(presentationData: presentationData, callListSettings: callListSettings, experimentalUISettings: experimentalUISettings, appConfiguration: appConfiguration, nameColors: PeerNameColors.with(availableReplyColors: availableReplyColors, availableProfileColors: availableProfileColors), state: state)
         
-        let controllerState = ItemListControllerState(presentationData: ItemListPresentationData(presentationData), title: .text("Swiftgram"), leftNavigationButton: nil, rightNavigationButton: nil, backNavigationButton: ItemListBackButton(title: presentationData.strings.Common_Back))
+        let controllerState = ItemListControllerState(presentationData: ItemListPresentationData(presentationData), title: .text("PrimeGram"), leftNavigationButton: nil, rightNavigationButton: nil, backNavigationButton: ItemListBackButton(title: presentationData.strings.Common_Back))
         
         // TODO(swiftgram): focusOnItemTag support
         /* var index = 0
